@@ -2,7 +2,16 @@
 ;; Chris Wanstrath <chris@ozmm.org>
 ;; Licensed under the same terms as Emacs.
 
-;; I didn't write most of this code
+;; I didn't write most of this code. 
+;; I don't know if it works without Aquamacs. 
+;; Patches welcome.
+
+;;
+;; Dependencies
+;;
+
+(add-to-list 'load-path (expand-file-name "vendor/fuzzy-find-in-project"))
+(require 'fuzzy-find-in-project)
 
 ;;
 ;; Keybindings
