@@ -1,0 +1,3 @@
+[submodule "vendor/fuzzy-find-in-project"]
+	path = vendor/fuzzy-find-in-project
+	url = git://github.com/avvo/fuzzy-find-in-project.git
