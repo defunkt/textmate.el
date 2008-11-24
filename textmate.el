@@ -21,6 +21,7 @@
 ;;    ⌘T - Go to File
 ;; ⇧⌘T - Go to Symbol
 ;;    ⌘L - Go to Line
+;;    ⌘/ - Comment Line (or Selection/Region)
 ;;    ⌘] - Shift Right (currently indents region)
 ;;    ⌘[ - Shift Left  (not yet implemented)
 ;;  ⌥⌘] - Align Assignments
@@ -78,6 +79,7 @@
   (define-key textmate-mode-map (kbd "A-M-]") 'align)
   (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
   (define-key textmate-mode-map (kbd "A-]") 'indent-region)
+  (define-key textmate-mode-map (kbd "A-/") 'comment-region-or-line)
   ;; Needed to override menu items
   (define-key osx-key-mode-map (kbd "A-t") 'textmate-goto-file)
   (define-key osx-key-mode-map (kbd "A-T") 'textmate-goto-symbol))
@@ -88,6 +90,7 @@
 ;  (define-key textmate-mode-map (kbd "A-M-t") 'textmate-clear-cache)  
 ;  (define-key textmate-mode-map [(meta ])] 'align)
 ;  (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
+;  (define-key textmate-mode-map (kbd "A-/") 'comment-region-or-line)  
   (define-key textmate-mode-map [(control tab)] 'indent-region)
   (define-key textmate-mode-map [(meta t)] 'textmate-goto-file)
   (define-key textmate-mode-map [(meta T)] 'textmate-goto-symbol))
