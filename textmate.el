@@ -57,7 +57,13 @@
 
 ;;; Bindings
 
+(defun textmate-ido-fix ()
+  "Add up/down keybindings for ido."
+  (define-key ido-completion-map [up] 'ido-prev-match)
+  (define-key ido-completion-map [down] 'ido-next-match))
+
 (defun textmate-bind-keys ()
+  (add-hook 'ido-setup-hook 'textmate-ido-fix)
   (if (boundp 'aquamacs-version) 
       (textmate-bind-aquamacs-keys)
     (textmate-bind-carbon-keys)))
