@@ -57,8 +57,7 @@
   "* Should `textmate-goto-file' keep a local cache of files?")
 (defvar *textmate-project-root* nil)
 (defvar *textmate-project-files* '())
-(defvar *textmate-gf-elisp-exclude* "vendor\\|fixtures\\|tmp\\|log\\|build\\|\\(.*\\.\\(nib\\|framework\\|app\\|pbproj\\|pbxproj\\|xcode\\(proj\\)?\\|bundle\\)$\\)")
-(defvar *textmate-gf-grep-exclude* "/\\.|vendor|fixtures|tmp|log|build|(/\\.\\(xcodeproj|nib|framework|app|pbproj|pbxproj|xcode(proj)?|bundle\\)$)")
+(defvar *textmate-gf-exclude* "/\\.|vendor|fixtures|tmp|log|build|(/\\.\\(xcodeproj|nib|framework|app|pbproj|pbxproj|xcode(proj)?|bundle\\)$)")
 (defvar textmate-mode-map (make-sparse-keymap))
 
 ;;; Bindings
@@ -149,46 +148,14 @@
 
 ;;; Utilities
 
-(defmacro textmate-has-command (command)
-  `(> (length (shell-command-to-string (concat "which " ,command))) 0))
-
 (defun textmate-project-files (root)
-  (if (and 
-        (textmate-has-command "find") 
-        (textmate-has-command "grep") 
-        (textmate-has-command "sed"))
-      (textmate-shell-project-files root)
-    (textmate-elisp-project-files root)))
-
-;; pure elisp
-(defun textmate-elisp-project-files (root)
-  (let ((files) (result (directory-files root t "^[^.]" t)))
-    (while result
-      (cond
-       ((string-match *textmate-gf-elisp-exclude* (car result)) 
-        (setq result (cdr result)))
-       ((file-directory-p (car result)) 
-        (setq result (append 
-                      (cdr result) 
-                      (directory-files (car result) t "^[^.]" t))))
-       (t
-         (setq 
-          files 
-          (append files 
-                  (list 
-                   (replace-regexp-in-string *textmate-project-root* "" (car result)))))
-         (setq result (cdr result)))))
-    files))
-
-;; shell out
-(defun textmate-shell-project-files (root)
   (split-string 
    (shell-command-to-string 
     (concat 
      "find " 
      root
      " -type f  | grep -vE '"
-     *textmate-gf-grep-exclude*
+     *textmate-gf-exclude*
      "' | sed 's:"
      *textmate-project-root* 
      "/::'")) "\n" t))
