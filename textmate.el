@@ -80,9 +80,8 @@
   (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
   (define-key textmate-mode-map (kbd "A-]") 'indent-region)
   (define-key textmate-mode-map (kbd "A-/") 'comment-region-or-line)
-  ;; Needed to override menu items
-  (define-key osx-key-mode-map (kbd "A-t") 'textmate-goto-file)
-  (define-key osx-key-mode-map (kbd "A-T") 'textmate-goto-symbol))
+  (define-key osx-key-mode-map (kbd "A-t") 'textmate-goto-file)     ;; Need `osx-key-mode-map' to override 
+  (define-key osx-key-mode-map (kbd "A-T") 'textmate-goto-symbol))  ;; Aquamacs menu item key bindings.
 
 (defun textmate-bind-carbon-keys ()
   ;; Are these any good? Anyone have good Carbon defaults?
