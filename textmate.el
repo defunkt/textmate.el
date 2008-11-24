@@ -52,10 +52,12 @@
 
 ;;; Minor mode
 
-(defvar textmate-mode-map (make-sparse-keymap))
+(defvar textmate-use-file-cache t
+  "* Should `textmate-goto-file' keep a local cache of files?")
 (defvar *textmate-project-root* nil)
 (defvar *textmate-project-files* '())
 (defvar *textmate-gf-exclude* "vendor\\|fixtures\\|tmp\\|log\\|\\(.*\\.\\(nib\\|framework\\|app\\|pbproj\\|pbxproj\\|xcode\\(proj\\)?\\|bundle\\)$\\)")
+(defvar textmate-mode-map (make-sparse-keymap))
 
 ;;; Bindings
 
@@ -162,8 +164,10 @@
     files))
 
 (defun textmate-cached-project-files ()
-  (when (and (not (null *textmate-project-files*))
-    (equal *textmate-project-root* (car *textmate-project-files*)))
+  (when (and 
+         textmate-use-file-cache
+         (not (null *textmate-project-files*))
+         (equal *textmate-project-root* (car *textmate-project-files*)))
     (cdr *textmate-project-files*)))
 
 (defun textmate-find-project-root ()
