@@ -72,6 +72,7 @@
 
 (defun textmate-bind-aquamacs-keys ()
   (define-key textmate-mode-map [A-return] 'textmate-next-line)
+  (define-key textmate-mode-map (kbd "A-M-t") 'textmate-clear-cache)
   (define-key textmate-mode-map (kbd "A-M-]") 'align)
   (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
   (define-key textmate-mode-map (kbd "A-]") 'indent-region)
@@ -82,6 +83,7 @@
 (defun textmate-bind-carbon-keys ()
   ;; Are these any good? Anyone have good Carbon defaults?
   (define-key textmate-mode-map [M-return] 'textmate-next-line)
+;  (define-key textmate-mode-map (kbd "A-M-t") 'textmate-clear-cache)  
 ;  (define-key textmate-mode-map [(meta ])] 'align)
 ;  (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
   (define-key textmate-mode-map [(control tab)] 'indent-region)
@@ -137,7 +139,8 @@
 (defun textmate-clear-cache ()
   (interactive)
   (setq *textmate-project-root* nil)
-  (setq *textmate-project-files* nil))
+  (setq *textmate-project-files* nil)
+  (message "textmate-mode cache cleared."))
 
 ;;; Utilities
 
