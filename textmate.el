@@ -19,7 +19,7 @@
 ;; features. 
 
 ;;    ⌘T - Go to File
-;; ⇧⌘T - Go to Symbol
+;;  ⇧⌘T - Go to Symbol
 ;;    ⌘L - Go to Line
 ;;    ⌘/ - Comment Line (or Selection/Region)
 ;;    ⌘] - Shift Right (currently indents region)
