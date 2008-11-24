@@ -152,11 +152,14 @@
 (defun textmate-project-files (&optional root)
   (cond
    ((null root) '())
-   ((listp root) 
-    (mapcar
-     (lambda (path)
-       (replace-regexp-in-string (expand-file-name (concat *textmate-project-root* "/")) "" path))
-     (remq nil (flatten (cons (textmate-project-files (car root)) (textmate-project-files (cdr root)))))))
+   ((listp root)
+    (let ((head (textmate-project-files (car root))) (tail (textmate-project-files (cdr root))))
+      (cond 
+       ((null head) tail)
+       ((listp head) (append head tail))
+       ((stringp head) (cons 
+                        (replace-regexp-in-string *textmate-project-root* "" head)
+                        tail)))))
    ((string-match *textmate-gf-exclude* root) '())
    ((file-directory-p root) (textmate-project-files (directory-files root t "^[^.]+" t)))
    (t root)))
