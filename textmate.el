@@ -189,7 +189,9 @@
 ;;;###autoload
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
   :lighter " mate" :global t :keymap textmate-mode-map
-  (textmate-bind-keys))
+  (textmate-bind-keys)
+  (ido-mode t)
+  (setq ido-enable-flex-matching t))
 
 (provide 'textmate)
 ;;; textmate.el ends here
