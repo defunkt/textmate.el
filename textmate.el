@@ -26,6 +26,7 @@
 ;;  ⌥⌘] - Align Assignments
 ;;  ⌥⌘[ - Indent Line
 ;;  ⌘RET - Insert Newline at Line's End
+;;  ⌥⌘T - Reset File Cache (for Go to File)
 
 ;; A "project" in textmate-mode is determined by the presence of
 ;; a .git directory. If no .git directory is found in your current
@@ -53,7 +54,8 @@
 
 (defvar textmate-mode-map (make-sparse-keymap))
 (defvar *textmate-project-root* nil)
-(defvar *textmate-gf-exclude* "vendor\\|fixtures\\|tmp\\|log")
+(defvar *textmate-project-files* '())
+(defvar *textmate-gf-exclude* "vendor\\|fixtures\\|tmp\\|log\\|\\(.*\\.\\(nib\\|framework\\|app\\|pbproj\\|pbxproj\\|xcode\\(proj\\)?\\|bundle\\)$\\)")
 
 ;;; Bindings
 
@@ -127,8 +129,15 @@
 (defun textmate-goto-file (&optional starting)
   (interactive)
   (textmate-find-project-root)
-  (find-file (concat *textmate-project-root* "/"
-                     (ido-completing-read "Find file: " (textmate-project-files *textmate-project-root*)))))
+  (find-file (concat (expand-file-name *textmate-project-root*) "/"
+                     (ido-completing-read "Find file: " 
+                                          (or (textmate-cached-project-files) 
+                                              (textmate-cache-project-files *textmate-project-root*))))))
+
+(defun textmate-clear-cache ()
+  (interactive)
+  (setq *textmate-project-root* nil)
+  (setq *textmate-project-files* nil))
 
 ;;; Utilities
 
@@ -144,9 +153,19 @@
    ((file-directory-p root) (textmate-project-files (directory-files root t "^[^.]+" t)))
    (t root)))
 
+(defun textmate-cache-project-files (root)
+  (let ((files (textmate-project-files root)))
+    (setq *textmate-project-files* `(,root . ,files))
+    files))
+
+(defun textmate-cached-project-files ()
+  (when (and (not (null *textmate-project-files*))
+    (equal *textmate-project-root* (car *textmate-project-files*)))
+    (cdr *textmate-project-files*)))
+
 (defun textmate-find-project-root ()
   (when (or (null *textmate-project-root*) (not (string-match default-directory *textmate-project-root*)))
-    (setq *textmate-project-root* (textmate-project-root))))
+    (setq *textmate-project-root* (expand-file-name (textmate-project-root)))))
 
 (defun textmate-project-root (&optional root)
   (when (null root) (setq root default-directory))
