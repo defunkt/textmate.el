@@ -168,12 +168,12 @@
 
 (defun textmate-find-project-root ()
   (when (or (null *textmate-project-root*) (not (string-match default-directory *textmate-project-root*)))
-    (setq *textmate-project-root* (expand-file-name (textmate-project-root)))))
+    (setq *textmate-project-root* (expand-file-name (concat (textmate-project-root) "/")))))
 
 (defun textmate-project-root (&optional root)
   (when (null root) (setq root default-directory))
   (cond
-   ((member ".git" (directory-files root)) root)
+   ((member ".git" (directory-files root)) (expand-file-name root))
    ((equal (expand-file-name root) "/") (error "Can't find any .git directory"))
    (t (textmate-project-root (concat (file-name-as-directory root) "..")))))
 
