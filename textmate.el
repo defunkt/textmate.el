@@ -152,7 +152,7 @@
   (when (null root) (setq root default-directory))
   (cond
    ((member ".git" (directory-files root)) root)
-   ((eq root "/") (message "u") nil)
+   ((equal (expand-file-name root) "/") (error "Can't find any .git directory"))
    (t (textmate-project-root (concat (file-name-as-directory root) "..")))))
 
 ;;;###autoload
