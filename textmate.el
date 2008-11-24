@@ -71,7 +71,7 @@
 (defun textmate-bind-aquamacs-keys ()
   (define-key textmate-mode-map [A-return] 'textmate-next-line)
   (define-key textmate-mode-map (kbd "A-M-]") 'align)
-  (define-key textmate-mode-map (kbd "A-M-[") 'indent)
+  (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
   (define-key textmate-mode-map (kbd "A-]") 'indent-region)
   ;; Needed to override menu items
   (define-key osx-key-mode-map (kbd "A-t") 'textmate-goto-file)
@@ -81,7 +81,7 @@
   ;; Are these any good? Anyone have good Carbon defaults?
   (define-key textmate-mode-map [M-return] 'textmate-next-line)
 ;  (define-key textmate-mode-map [(meta ])] 'align)
-;  (define-key textmate-mode-map (kbd "A-M-[") 'indent)
+;  (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
   (define-key textmate-mode-map [(control tab)] 'indent-region)
   (define-key textmate-mode-map [(meta t)] 'textmate-goto-file)
   (define-key textmate-mode-map [(meta T)] 'textmate-goto-symbol))
