@@ -1,14 +1,44 @@
 ;; textmate.el --- TextMate minor mode for Emacs
-;; Chris Wanstrath <chris@ozmm.org>
+
+;; Copyright (C) 2008 Chris Wanstrath <chris@ozmm.org>
+
 ;; Licensed under the same terms as Emacs.
 
-;; I didn't write most of this code. 
-;; I don't know if it works without Aquamacs. 
-;; Patches welcome.
+;; Version: 0.1.0
+;; Keywords: textmate osx mac
+;; Created: 22 Nov 2008
+;; Author: Chris Wanstrath <chris@ozmm.org>
 
-;;
-;; Installation
-;;
+;; This file is NOT part of GNU Emacs.
+
+;; Licensed under the same terms as Emacs.
+
+;;; Commentary:
+
+;; This minor mode exists to mimick TextMate's awesome
+;; features. 
+
+;;    ⌘T - Go to File
+;; ⇧⌘T - Go to Symbol
+;;    ⌘L - Go to Line
+;;    ⌘] - Shift Right (currently indents region)
+;;    ⌘[ - Shift Left  (not yet implemented)
+;;  ⌥⌘] - Align Assignments
+;;  ⌥⌘[ - Indent Line
+;;  ⌘RET - Insert Newline at Line's End
+
+;; A "project" in textmate-mode is determined by the presence of
+;; a .git directory. If no .git directory is found in your current
+;; directory, textmate-mode will traverse upwards until one (or none)
+;; is found. The directory housing the .git directory is presumed
+;; to be the project's root.
+
+;; In other words, calling Go to File from 
+;; ~/Projects/fieldrunners/app/views/towers/show.html.erb will use
+;; ~/Projects/fieldrunners/ as the root if ~/Projects/fieldrunners/.git
+;; exists.
+
+;;; Installation
 
 ;; $ cd ~/.emacs.d/vendor
 ;; $ git clone git://github.com/defunkt/textmate.el.git
@@ -17,12 +47,13 @@
 ;;
 ;; (add-to-list 'load-path "~/.emacs.d/vendor/textmate.el")
 ;; (require 'textmate)
+;; (textmate-mode)
 
 ;;; Minor mode
 
 (defvar textmate-mode-map (make-sparse-keymap))
 (defvar *textmate-project-root* nil)
-(defvar *textmate-fip-exclude-pattern* "vendor\\|fixtures\\|tmp\\|log")
+(defvar *textmate-gf-exclude* "vendor\\|fixtures\\|tmp\\|log")
 
 ;;; Bindings
 
@@ -32,30 +63,32 @@
     (textmate-bind-carbon-keys)))
 
 (defun textmate-bind-aquamacs-keys ()
-  (define-key textmate-mode-map [A-return] 'textmate-insert-blank-line-after-current)
+  (define-key textmate-mode-map [A-return] 'textmate-next-line)
   (define-key textmate-mode-map (kbd "A-M-]") 'align)
+  (define-key textmate-mode-map (kbd "A-M-[") 'indent)
   (define-key textmate-mode-map (kbd "A-]") 'indent-region)
   ;; Needed to override menu items
-  (define-key osx-key-mode-map (kbd "A-t") 'textmate-find-in-project)
-  (define-key osx-key-mode-map (kbd "A-T") 'textmate-find-symbol))
+  (define-key osx-key-mode-map (kbd "A-t") 'textmate-goto-file)
+  (define-key osx-key-mode-map (kbd "A-T") 'textmate-goto-symbol))
 
 (defun textmate-bind-carbon-keys ()
   ;; Are these any good? Anyone have good Carbon defaults?
-  (define-key textmate-mode-map [M-return] 'textmate-insert-blank-line-after-current)
+  (define-key textmate-mode-map [M-return] 'textmate-next-line)
 ;  (define-key textmate-mode-map [(meta ])] 'align)
+;  (define-key textmate-mode-map (kbd "A-M-[") 'indent)
   (define-key textmate-mode-map [(control tab)] 'indent-region)
-  (define-key textmate-mode-map [(meta t)] 'textmate-find-in-project)
-  (define-key textmate-mode-map [(meta T)] 'textmate-find-symbol))
+  (define-key textmate-mode-map [(meta t)] 'textmate-goto-file)
+  (define-key textmate-mode-map [(meta T)] 'textmate-goto-symbol))
 
 ;;; Commands
 
-(defun textmate-insert-blank-line-after-current ()
+(defun textmate-next-line ()
   (interactive)
   (end-of-line)
   (newline-and-indent))
 
 ;; http://chopmo.blogspot.com/2008/09/quickly-jumping-to-symbols.html
-(defun textmate-find-symbol ()
+(defun textmate-goto-symbol ()
   "Will update the imenu index and then use ido to select a symbol to navigate to"
   (interactive)
   (imenu--make-index-alist)
@@ -85,13 +118,13 @@
            (position (cdr (assoc selected-symbol name-and-pos))))
       (goto-char position))))
 
-;;; Utilities
-
-(defun textmate-find-in-project (&optional starting)
+(defun textmate-goto-file (&optional starting)
   (interactive)
   (textmate-find-project-root)
   (find-file (concat *textmate-project-root* "/"
                      (ido-completing-read "Find file: " (textmate-project-files *textmate-project-root*)))))
+
+;;; Utilities
 
 (defun textmate-project-files (&optional root)
   (cond
@@ -101,7 +134,7 @@
      (lambda (path)
        (replace-regexp-in-string (expand-file-name (concat *textmate-project-root* "/")) "" path))
      (remq nil (flatten (cons (textmate-project-files (car root)) (textmate-project-files (cdr root)))))))
-   ((string-match *textmate-fip-exclude-pattern* root) '())
+   ((string-match *textmate-gf-exclude* root) '())
    ((file-directory-p root) (textmate-project-files (directory-files root t "^[^.]+" t)))
    (t root)))
 
