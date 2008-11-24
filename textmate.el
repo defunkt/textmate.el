@@ -102,10 +102,11 @@
 (defun textmate-bind-carbon-keys ()
   ;; Are these any good? Anyone have good Carbon defaults?
   (define-key textmate-mode-map [M-return] 'textmate-next-line)
-;  (define-key textmate-mode-map (kbd "A-M-t") 'textmate-clear-cache)  
-;  (define-key textmate-mode-map [(meta ])] 'align)
+  (define-key textmate-mode-map [(control c)(control t)] 'textmate-clear-cache)  
+  (define-key textmate-mode-map [(control c)(control a)] 'align)
+; the following line uses the same behavior as indenting with tab?
 ;  (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
-;  (define-key textmate-mode-map (kbd "A-/") 'comment-region-or-line)  
+  (define-key textmate-mode-map [(control c)(control k)] 'comment-region-or-line) 
   (define-key textmate-mode-map [(control tab)] 'indent-region)
   (define-key textmate-mode-map [(meta t)] 'textmate-goto-file)
   (define-key textmate-mode-map [(meta T)] 'textmate-goto-symbol))
