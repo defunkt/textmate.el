@@ -152,8 +152,8 @@
   (when (null root) (setq root default-directory))
   (cond
    ((member ".git" (directory-files root)) root)
-   ((eq root "/") nil)
-   (t (textmate-project-root (concat root "..")))))
+   ((eq root "/") (message "u") nil)
+   (t (textmate-project-root (concat (file-name-as-directory root) "..")))))
 
 ;;;###autoload
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
