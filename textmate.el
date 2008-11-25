@@ -58,8 +58,16 @@
 (defvar *textmate-project-root* nil)
 (defvar *textmate-project-files* '())
 (defvar *textmate-gf-exclude* "vendor\\|fixtures\\|tmp\\|log\\|\\(.*\\.\\(nib\\|framework\\|app\\|pbproj\\|pbxproj\\|xcode\\(proj\\)?\\|bundle\\)$\\)")
-(defvar textmate-completing-library 'ido "The library `textmade-goto-symbol' and `textmate-goto-file' should use for completing filenames and symbols (`ido' by default)")
-(defvar textmate-completing-function-alist '((ido ido-completing-read) (icicles  icicles-completing-read)))
+(defvar textmate-completing-library 'ido 
+  "The library `textmade-goto-symbol' and `textmate-goto-file' should use for completing filenames and symbols (`ido' by default)")
+(defvar textmate-completing-function-alist '((ido ido-completing-read) 
+					     (icicles  icicle-completing-read) 
+					     (none completing-read)) 
+  "The function to call to read file names and symbols from the user")
+(defvar textmate-completing-minor-mode-alist `((ido ,(lambda (a) (progn (ido-mode a) (setq ido-enable-flex-matching t)))) 
+					       (icicles ,(lambda (a) (icy-mode a))) 
+					       (none ,(lambda (a) ())))
+  "The list of functions to enable and disable completing minor modes")
 
 (defvar textmate-mode-map (make-sparse-keymap))
 
@@ -194,13 +202,11 @@
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
   :lighter " mate" :global t :keymap textmate-mode-map
   (textmate-bind-keys)
-  ;; prefer icicles to ido
-  (if (fboundp 'icy-mode)
-      (progn
-	(icy-mode t)
-	(setq textmate-completing-library 'icicles))
-    (progn (ido-mode t)
-	   (setq ido-enable-flex-matching t))))
+  ; activate preferred completion library
+  (dolist (mode textmate-completing-minor-mode-alist)
+    (if (eq (car mode) textmate-completing-library)
+	(funcall (cadr mode) t)
+      (funcall (cadr mode) -1))))
 
 (provide 'textmate)
 ;;; textmate.el ends here
