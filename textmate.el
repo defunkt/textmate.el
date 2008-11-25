@@ -55,21 +55,25 @@
 
 (defvar textmate-use-file-cache t
   "* Should `textmate-goto-file' keep a local cache of files?")
-(defvar *textmate-project-root* nil)
-(defvar *textmate-project-files* '())
-(defvar *textmate-gf-exclude* "vendor\\|fixtures\\|tmp\\|log\\|\\(.*\\.\\(nib\\|framework\\|app\\|pbproj\\|pbxproj\\|xcode\\(proj\\)?\\|bundle\\)$\\)")
+
 (defvar textmate-completing-library 'ido 
   "The library `textmade-goto-symbol' and `textmate-goto-file' should use for completing filenames and symbols (`ido' by default)")
+
 (defvar textmate-completing-function-alist '((ido ido-completing-read) 
-					     (icicles  icicle-completing-read) 
-					     (none completing-read)) 
+                                             (icicles  icicle-completing-read) 
+                                             (none completing-read)) 
   "The function to call to read file names and symbols from the user")
-(defvar textmate-completing-minor-mode-alist `((ido ,(lambda (a) (progn (ido-mode a) (setq ido-enable-flex-matching t)))) 
-					       (icicles ,(lambda (a) (icy-mode a))) 
-					       (none ,(lambda (a) ())))
+
+(defvar textmate-completing-minor-mode-alist 
+  `((ido ,(lambda (a) (progn (ido-mode a) (setq ido-enable-flex-matching t)))) 
+    (icicles ,(lambda (a) (icy-mode a))) 
+    (none ,(lambda (a) ())))
   "The list of functions to enable and disable completing minor modes")
 
 (defvar textmate-mode-map (make-sparse-keymap))
+(defvar *textmate-project-root* nil)
+(defvar *textmate-project-files* '())
+(defvar *textmate-gf-exclude* "vendor\\|fixtures\\|tmp\\|log\\|\\(.*\\.\\(nib\\|framework\\|app\\|pbproj\\|pbxproj\\|xcode\\(proj\\)?\\|bundle\\)$\\)")
 
 ;;; Bindings
 
