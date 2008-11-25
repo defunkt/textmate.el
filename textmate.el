@@ -57,7 +57,10 @@
   "* Should `textmate-goto-file' keep a local cache of files?")
 (defvar *textmate-project-root* nil)
 (defvar *textmate-project-files* '())
-(defvar *textmate-gf-exclude* "/\\.|vendor|fixtures|tmp|log|build|(/\\.\\(xcodeproj|nib|framework|app|pbproj|pbxproj|xcode(proj)?|bundle\\)$)")
+(defvar *textmate-gf-exclude* "vendor\\|fixtures\\|tmp\\|log\\|\\(.*\\.\\(nib\\|framework\\|app\\|pbproj\\|pbxproj\\|xcode\\(proj\\)?\\|bundle\\)$\\)")
+(defvar textmate-completing-library 'ido "The library `textmade-goto-symbol' and `textmate-goto-file' should use for completing filenames and symbols (`ido' by default)")
+(defvar textmate-completing-function-alist '((ido ido-completing-read) (icicles  icicles-completing-read)))
+
 (defvar textmate-mode-map (make-sparse-keymap))
 
 ;;; Bindings
@@ -94,6 +97,10 @@
   (define-key textmate-mode-map [(meta t)] 'textmate-goto-file)
   (define-key textmate-mode-map [(meta T)] 'textmate-goto-symbol))
 
+(defun textmate-completing-read (&rest args)
+  (let ((reading-fn (cadr (assoc textmate-completing-library textmate-completing-function-alist))))
+  (apply (symbol-function reading-fn) args)))
+
 ;;; Commands
 
 (defun textmate-next-line ()
@@ -128,7 +135,7 @@
                                (add-to-list 'symbol-names name)
                                (add-to-list 'name-and-pos (cons name position))))))))
       (addsymbols imenu--index-alist))
-    (let* ((selected-symbol (ido-completing-read "Symbol: " symbol-names))
+    (let* ((selected-symbol (textmate-completing-read "Symbol: " symbol-names))
            (position (cdr (assoc selected-symbol name-and-pos))))
       (goto-char position))))
 
@@ -136,7 +143,7 @@
   (interactive)
   (textmate-find-project-root)
   (find-file (concat (expand-file-name *textmate-project-root*) "/"
-                     (ido-completing-read "Find file: " 
+                     (textmate-completing-read "Find file: " 
                                           (or (textmate-cached-project-files) 
                                               (textmate-cache-project-files *textmate-project-root*))))))
 
@@ -187,8 +194,13 @@
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
   :lighter " mate" :global t :keymap textmate-mode-map
   (textmate-bind-keys)
-  (ido-mode t)
-  (setq ido-enable-flex-matching t))
+  ;; prefer icicles to ido
+  (if (fboundp 'icy-mode)
+      (progn
+	(icy-mode t)
+	(setq textmate-completing-library 'icicles))
+    (progn (ido-mode t)
+	   (setq ido-enable-flex-matching t))))
 
 (provide 'textmate)
 ;;; textmate.el ends here
