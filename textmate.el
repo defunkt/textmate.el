@@ -154,7 +154,8 @@
 
 (defun textmate-goto-file (&optional starting)
   (interactive)
-  (textmate-find-project-root)
+  (when (null (textmate-set-project-root)) 
+    (error "Can't find any .git directory"))
   (find-file (concat (expand-file-name *textmate-project-root*) "/"
                      (textmate-completing-read "Find file: " 
                                           (or (textmate-cached-project-files) 
@@ -192,16 +193,24 @@
          (equal *textmate-project-root* (car *textmate-project-files*)))
     (cdr *textmate-project-files*)))
 
-(defun textmate-find-project-root ()
-  (when (or (null *textmate-project-root*) (not (string-match default-directory *textmate-project-root*)))
-    (setq *textmate-project-root* (expand-file-name (concat (textmate-project-root) "/")))))
+(defun textmate-project-root ()
+  (or (textmate-set-project-root) *textmate-project-root*))
 
-(defun textmate-project-root (&optional root)
+(defun textmate-set-project-root ()
+  (when (or 
+         (null *textmate-project-root*) 
+         (not (string-match *textmate-project-root* default-directory)))
+    (let ((root (textmate-find-project-root)))
+      (if root
+          (setq *textmate-project-root* (expand-file-name (concat root "/")))
+        (setq *textmate-project-root* nil)))))
+
+(defun textmate-find-project-root (&optional root)
   (when (null root) (setq root default-directory))
   (cond
    ((member ".git" (directory-files root)) (expand-file-name root))
-   ((equal (expand-file-name root) "/") (error "Can't find any .git directory"))
-   (t (textmate-project-root (concat (file-name-as-directory root) "..")))))
+   ((equal (expand-file-name root) "/") nil)
+   (t (textmate-find-project-root (concat (file-name-as-directory root) "..")))))
 
 ;;;###autoload
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
