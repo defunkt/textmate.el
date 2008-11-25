@@ -218,9 +218,8 @@
   (textmate-bind-keys)
   ; activate preferred completion library
   (dolist (mode textmate-completing-minor-mode-alist)
-    (if (eq (car mode) textmate-completing-library)
-	(funcall (cadr mode) t)
-      (funcall (cadr mode) -1))))
+    (when (eq (car mode) textmate-completing-library)
+        (funcall (cadr mode) t))))
 
 (provide 'textmate)
 ;;; textmate.el ends here
