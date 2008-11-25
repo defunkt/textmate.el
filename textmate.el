@@ -95,7 +95,7 @@
   (define-key textmate-mode-map (kbd "A-M-]") 'align)
   (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
   (define-key textmate-mode-map (kbd "A-]") 'indent-region)
-  (define-key textmate-mode-map (kbd "A-/") 'comment-region-or-line)
+  (define-key textmate-mode-map (kbd "A-/") 'comment-or-uncomment-region-or-line)
   (define-key osx-key-mode-map (kbd "A-t") 'textmate-goto-file)     ;; Need `osx-key-mode-map' to override 
   (define-key osx-key-mode-map (kbd "A-T") 'textmate-goto-symbol))  ;; Aquamacs menu item key bindings.
 
