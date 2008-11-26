@@ -76,6 +76,24 @@
 (defvar *textmate-gf-exclude* 
   "/\\.|vendor|fixtures|tmp|log|build|\\.xcodeproj|\\.nib|\\.framework|\\.app|\\.pbproj|\\.pbxproj|\\.xcode|\\.xcodeproj|\\.bundle")
 
+(defvar textmate-keybindings-list ()
+  '((textmate-next-line 
+     [A-return]    [M-return])
+    (textmate-clear-cache 
+     (kbd "A-M-t") [(control c)(control t)])
+    (align 
+     (kbd "A-M-]") [(control c)(control a)])
+    (indent-according-to-mode 
+     (kbd "A-M-[") nil)
+    (indent-region 
+     (kbd "A-]")   [(control tab)])
+    (comment-or-uncomment-region-or-line 
+     (kbd "A-/")   [(control c)(control k)])
+    (textmate-goto-file 
+     (kbd "A-t")   [(meta t)])
+    (textmate-goto-symbol 
+     (kbd "A-T")   [(meta T)])))
+
 ;;; Bindings
 
 (defun textmate-ido-fix ()
@@ -85,29 +103,17 @@
 
 (defun textmate-bind-keys ()
   (add-hook 'ido-setup-hook 'textmate-ido-fix)
-  (if (boundp 'aquamacs-version) 
-      (textmate-bind-aquamacs-keys)
-    (textmate-bind-carbon-keys)))
 
-(defun textmate-bind-aquamacs-keys ()
-  (define-key textmate-mode-map [A-return] 'textmate-next-line)
-  (define-key textmate-mode-map (kbd "A-M-t") 'textmate-clear-cache)
-  (define-key textmate-mode-map (kbd "A-M-]") 'align)
-  (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
-  (define-key textmate-mode-map (kbd "A-]") 'indent-region)
-  (define-key textmate-mode-map (kbd "A-/") 'comment-or-uncomment-region-or-line)
-  (define-key osx-key-mode-map (kbd "A-t") 'textmate-goto-file)     ;; Need `osx-key-mode-map' to override 
-  (define-key osx-key-mode-map (kbd "A-T") 'textmate-goto-symbol))  ;; Aquamacs menu item key bindings.
-
-(defun textmate-bind-carbon-keys ()
-  (define-key textmate-mode-map [M-return] 'textmate-next-line)
-  (define-key textmate-mode-map [(control c)(control t)] 'textmate-clear-cache)  
-  (define-key textmate-mode-map [(control c)(control a)] 'align)
-;  (define-key textmate-mode-map (kbd "A-M-[") 'indent-according-to-mode)
-  (define-key textmate-mode-map [(control tab)] 'indent-region)
-  (define-key textmate-mode-map [(control c)(control k)] 'comment-or-uncomment-region-or-line)   
-  (define-key textmate-mode-map [(meta t)] 'textmate-goto-file)
-  (define-key textmate-mode-map [(meta T)] 'textmate-goto-symbol))
+  ; weakness until i figure out how to do this right
+  (when (boundp 'osx-key-mode-map)
+    (define-key osx-key-mode-map (kbd "A-t") 'textmate-goto-file)
+    (define-key osx-key-mode-map (kbd "A-T") 'textmate-goto-symbol)) 
+ 
+  (let ((member) (i 0) (access (if (boundp 'aquamacs-version) 'cadr 'caddr)))
+    (setq member (nth i textmate-keybindings-list))
+    (while member
+      (define-key textmate-mode-map (funcall access member) (car member))
+      (setq member (nth i textmate-keybindings-list)))))
 
 (defun textmate-completing-read (&rest args)
   (let ((reading-fn (cadr (assoc textmate-completing-library textmate-completing-function-alist))))
