@@ -51,6 +51,9 @@
 ;; (require 'textmate)
 ;; (textmate-mode)
 
+;;; Depends on imenu
+(require 'imenu)
+
 ;;; Minor mode
 
 (defvar textmate-use-file-cache t
