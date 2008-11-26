@@ -79,23 +79,22 @@
 (defvar *textmate-gf-exclude* 
   "/\\.|vendor|fixtures|tmp|log|build|\\.xcodeproj|\\.nib|\\.framework|\\.app|\\.pbproj|\\.pbxproj|\\.xcode|\\.xcodeproj|\\.bundle")
 
-(defvar textmate-keybindings-list ()
-  '((textmate-next-line 
-     [A-return]    [M-return])
-    (textmate-clear-cache 
-     (kbd "A-M-t") [(control c)(control t)])
-    (align 
-     (kbd "A-M-]") [(control c)(control a)])
-    (indent-according-to-mode 
-     (kbd "A-M-[") nil)
-    (indent-region 
-     (kbd "A-]")   [(control tab)])
-    (comment-or-uncomment-region-or-line 
-     (kbd "A-/")   [(control c)(control k)])
-    (textmate-goto-file 
-     (kbd "A-t")   [(meta t)])
-    (textmate-goto-symbol 
-     (kbd "A-T")   [(meta T)])))
+(defvar textmate-keybindings-list `((textmate-next-line 
+                                     [A-return]    [M-return])
+                                   (textmate-clear-cache 
+                                    ,(kbd "A-M-t") [(control c)(control t)])
+                                   (align 
+                                    ,(kbd "A-M-]") [(control c)(control a)])
+                                   (indent-according-to-mode 
+                                    ,(kbd "A-M-[") nil)
+                                   (indent-region 
+                                    ,(kbd "A-]")   [(control tab)])
+                                   (comment-or-uncomment-region-or-line 
+                                    ,(kbd "A-/")   [(control c)(control k)])
+                                   (textmate-goto-file 
+                                    ,(kbd "A-t")   [(meta t)])
+                                   (textmate-goto-symbol 
+                                    ,(kbd "A-T")   [(meta T)])))
 
 ;;; Bindings
 
@@ -116,7 +115,8 @@
     (setq member (nth i textmate-keybindings-list))
     (while member
       (define-key textmate-mode-map (funcall access member) (car member))
-      (setq member (nth i textmate-keybindings-list)))))
+      (setq member (nth i textmate-keybindings-list))
+      (setq i (+ i 1)))))
 
 (defun textmate-completing-read (&rest args)
   (let ((reading-fn (cadr (assoc textmate-completing-library textmate-completing-function-alist))))
