@@ -203,7 +203,8 @@
     (let ((root (textmate-find-project-root)))
       (if root
           (setq *textmate-project-root* (expand-file-name (concat root "/")))
-        (setq *textmate-project-root* nil)))))
+        (setq *textmate-project-root* nil))))
+  *textmate-project-root*)
 
 (defun textmate-find-project-root (&optional root)
   (when (null root) (setq root default-directory))
