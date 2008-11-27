@@ -161,14 +161,17 @@
            (position (cdr (assoc selected-symbol name-and-pos))))
       (goto-char position))))
 
-(defun textmate-goto-file (&optional starting)
+(defun textmate-goto-file ()
   (interactive)
-  (when (null (textmate-set-project-root)) 
-    (error "Can't find any .git directory"))
-  (find-file (concat (expand-file-name *textmate-project-root*) "/"
-                     (textmate-completing-read "Find file: " 
-                                          (or (textmate-cached-project-files) 
-                                              (textmate-cache-project-files *textmate-project-root*))))))
+  (let ((root (textmate-project-root)))
+    (when (null root) 
+      (error "Can't find any .git directory"))
+    (find-file 
+     (concat 
+      (expand-file-name root) "/"
+      (textmate-completing-read 
+       "Find file: "
+       (textmate-cached-project-files root))))))
 
 (defun textmate-clear-cache ()
   (interactive)
@@ -180,32 +183,25 @@
 
 (defun textmate-project-files (root)
   (split-string 
-   (shell-command-to-string 
-    (concat 
-     "find " 
-     root
-     " -type f  | grep -vE '"
-     *textmate-gf-exclude*
-     "' | sed 's:"
-     *textmate-project-root* 
-     "/::'")) "\n" t))
+    (shell-command-to-string 
+     (concat 
+      "find " 
+      root
+      " -type f  | grep -vE '"
+      *textmate-gf-exclude*
+      "' | sed 's:"
+      *textmate-project-root* 
+      "/::'")) "\n" t))
 
-(defun textmate-cache-project-files (root)
-  (let ((files (textmate-project-files root)))
-    (setq *textmate-project-files* `(,root . ,files))
-    files))
-
-(defun textmate-cached-project-files ()
-  (when (and 
-         textmate-use-file-cache
-         (not (null *textmate-project-files*))
-         (equal *textmate-project-root* (car *textmate-project-files*)))
-    (cdr *textmate-project-files*)))
+(defun textmate-cached-project-files (&optional root)
+  (cond
+   ((null textmate-use-file-cache) (textmate-project-files root))
+   ((equal (textmate-project-root) (car *textmate-project-files*))
+    (cdr *textmate-project-files*))
+   (t (cdr (setq *textmate-project-files* 
+                 `(,root . ,(textmate-project-files root)))))))
 
 (defun textmate-project-root ()
-  (or (textmate-set-project-root) *textmate-project-root*))
-
-(defun textmate-set-project-root ()
   (when (or 
          (null *textmate-project-root*) 
          (not (string-match *textmate-project-root* default-directory)))
