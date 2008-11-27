@@ -114,7 +114,8 @@
   (let ((member) (i 0) (access (if (boundp 'aquamacs-version) 'cadr 'caddr)))
     (setq member (nth i textmate-keybindings-list))
     (while member
-      (define-key textmate-mode-map (funcall access member) (car member))
+      (if (funcall access member)
+       (define-key textmate-mode-map (funcall access member) (car member)))
       (setq member (nth i textmate-keybindings-list))
       (setq i (+ i 1)))))
 
