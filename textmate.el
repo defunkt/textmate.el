@@ -62,39 +62,39 @@
 (defvar textmate-completing-library 'ido 
   "The library `textmade-goto-symbol' and `textmate-goto-file' should use for completing filenames and symbols (`ido' by default)")
 
-(defvar textmate-completing-function-alist '((ido ido-completing-read) 
-                                             (icicles  icicle-completing-read) 
-                                             (none completing-read)) 
+(defvar *textmate-completing-function-alist* '((ido ido-completing-read) 
+                                               (icicles  icicle-completing-read) 
+                                               (none completing-read)) 
   "The function to call to read file names and symbols from the user")
 
-(defvar textmate-completing-minor-mode-alist 
+(defvar *textmate-completing-minor-mode-alist* 
   `((ido ,(lambda (a) (progn (ido-mode a) (setq ido-enable-flex-matching t)))) 
     (icicles ,(lambda (a) (icy-mode a))) 
     (none ,(lambda (a) ())))
   "The list of functions to enable and disable completing minor modes")
 
-(defvar textmate-mode-map (make-sparse-keymap))
+(defvar *textmate-mode-map* (make-sparse-keymap))
 (defvar *textmate-project-root* nil)
 (defvar *textmate-project-files* '())
 (defvar *textmate-gf-exclude* 
   "/\\.|vendor|fixtures|tmp|log|build|\\.xcodeproj|\\.nib|\\.framework|\\.app|\\.pbproj|\\.pbxproj|\\.xcode|\\.xcodeproj|\\.bundle")
 
-(defvar textmate-keybindings-list `((textmate-next-line 
+(defvar *textmate-keybindings-list* `((textmate-next-line 
                                      [A-return]    [M-return])
-                                   (textmate-clear-cache 
-                                    ,(kbd "A-M-t") [(control c)(control t)])
-                                   (align 
-                                    ,(kbd "A-M-]") [(control c)(control a)])
-                                   (indent-according-to-mode 
-                                    ,(kbd "A-M-[") nil)
-                                   (indent-region 
-                                    ,(kbd "A-]")   [(control tab)])
-                                   (comment-or-uncomment-region-or-line 
-                                    ,(kbd "A-/")   [(control c)(control k)])
-                                   (textmate-goto-file 
-                                    ,(kbd "A-t")   [(meta t)])
-                                   (textmate-goto-symbol 
-                                    ,(kbd "A-T")   [(meta T)])))
+                                     (textmate-clear-cache 
+                                      ,(kbd "A-M-t") [(control c)(control t)])
+                                     (align 
+                                      ,(kbd "A-M-]") [(control c)(control a)])
+                                     (indent-according-to-mode 
+                                      ,(kbd "A-M-[") nil)
+                                     (indent-region 
+                                      ,(kbd "A-]")   [(control tab)])
+                                     (comment-or-uncomment-region-or-line 
+                                      ,(kbd "A-/")   [(control c)(control k)])
+                                     (textmate-goto-file 
+                                      ,(kbd "A-t")   [(meta t)])
+                                     (textmate-goto-symbol 
+                                      ,(kbd "A-T")   [(meta T)])))
 
 ;;; Bindings
 
@@ -112,15 +112,15 @@
     (define-key osx-key-mode-map (kbd "A-T") 'textmate-goto-symbol)) 
  
   (let ((member) (i 0) (access (if (boundp 'aquamacs-version) 'cadr 'caddr)))
-    (setq member (nth i textmate-keybindings-list))
+    (setq member (nth i *textmate-keybindings-list*))
     (while member
       (if (funcall access member)
-       (define-key textmate-mode-map (funcall access member) (car member)))
-      (setq member (nth i textmate-keybindings-list))
+       (define-key *textmate-mode-map* (funcall access member) (car member)))
+      (setq member (nth i *textmate-keybindings-list*))
       (setq i (+ i 1)))))
 
 (defun textmate-completing-read (&rest args)
-  (let ((reading-fn (cadr (assoc textmate-completing-library textmate-completing-function-alist))))
+  (let ((reading-fn (cadr (assoc textmate-completing-library *textmate-completing-function-alist*))))
   (apply (symbol-function reading-fn) args)))
 
 ;;; Commands
@@ -224,14 +224,14 @@
 
 ;;;###autoload
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
-  :lighter " mate" :global t :keymap textmate-mode-map
+  :lighter " mate" :global t :keymap *textmate-mode-map*
   (textmate-bind-keys)
   ; activate preferred completion library
-  (dolist (mode textmate-completing-minor-mode-alist)
+  (dolist (mode *textmate-completing-minor-mode-alist*)
     (if (eq (car mode) textmate-completing-library)
         (funcall (cadr mode) t)
       (when (fboundp 
-             (cadr (assoc (car mode) textmate-completing-function-alist)))
+             (cadr (assoc (car mode) *textmate-completing-function-alist*)))
         (funcall (cadr mode) -1)))))
 
 (provide 'textmate)
