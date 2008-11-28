@@ -44,6 +44,7 @@ Rave Reviews
 ![DaysAreMade](http://img.skitch.com/20081125-mgwafnkj3cku5dwqukqns57eus.png)
 ![SoFarSoAwesome](http://img.skitch.com/20081125-m2snw6s36eh7aifc3dh6acxk72.png)
 ![ReallyGreat](http://img.skitch.com/20081126-pk4qt8itb1482y7kg963af2aj1.png)
+![MadeMyWeek](http://img.skitch.com/20081128-k6gxswy6hxm5y3airagt8t8d1d.png)
 ![DontMissIt](http://img.skitch.com/20081127-g77d1iy86nu1wdi7y8amhd6ixy.png)
 
 Author
