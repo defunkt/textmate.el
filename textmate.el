@@ -96,6 +96,11 @@
                                      (textmate-goto-symbol 
                                       ,(kbd "A-T")   [(meta T)])))
 
+(defvar *textmate-project-root-p*
+  #'(lambda (coll) (member ".git" coll))
+  "*Lambda that, given a collection of directory entries, returns
+  non-nil if it represents the project root.")
+
 ;;; Bindings
 
 (defun textmate-ido-fix ()
@@ -214,7 +219,8 @@
 (defun textmate-find-project-root (&optional root)
   (when (null root) (setq root default-directory))
   (cond
-   ((member ".git" (directory-files root)) (expand-file-name root))
+   ((funcall *textmate-project-root-p* (directory-files root))
+    (expand-file-name root))
    ((equal (expand-file-name root) "/") nil)
    (t (textmate-find-project-root (concat (file-name-as-directory root) "..")))))
 
