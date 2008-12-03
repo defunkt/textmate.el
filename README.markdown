@@ -38,6 +38,13 @@ In your emacs config:
     (require 'textmate)
     (textmate-mode)
 
+Configuration
+=============
+
+To ignore additional files in a "project", use textmate-also-ignore in your emacs config.  For example if you had a directory named "gems" and a directory named "bin" that you wanted to ignore, you would add the following to your emacs config:
+
+    (textmate-also-ignore "bin|gems")
+
 Rave Reviews
 ============
 
