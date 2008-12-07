@@ -56,6 +56,9 @@
 
 ;;; Minor mode
 
+(defvar textmate-set-bindings t
+  "* Should key bindings be automatically configured upon loading this library? Set this to nil if you want to configure your own bindings.")
+
 (defvar textmate-use-file-cache t
   "* Should `textmate-goto-file' keep a local cache of files?")
 
@@ -256,7 +259,8 @@
 ;;;###autoload
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
   :lighter " mate" :global t :keymap *textmate-mode-map*
-  (textmate-bind-keys)
+  (when textmate-set-bindings
+    (textmate-bind-keys))
   ; activate preferred completion library
   (dolist (mode *textmate-completing-minor-mode-alist*)
     (if (eq (car mode) textmate-completing-library)
