@@ -225,7 +225,9 @@
 
 A place is considered `tab-width' character columns."
   (interactive)
-  (let ((beg (or (and mark-active (region-beginning)) (line-beginning-position)))
+  (let ((deactivate-mark nil)
+        (beg (or (and mark-active (region-beginning))
+                 (line-beginning-position)))
         (end (or (and mark-active (region-end)) (line-end-position))))
     (indent-rigidly beg end (* (or arg 1) tab-width))))
 
