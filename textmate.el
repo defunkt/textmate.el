@@ -229,12 +229,6 @@ A place is considered `tab-width' character columns."
         (end (or (and mark-active (region-end)) (line-end-position))))
     (indent-rigidly beg end (* (or arg 1) tab-width))))
 
-  (save-excursion
-    (when (not mark-active)
-      (push-mark (line-beginning-position))
-      (goto-char (line-end-position)))
-    (indent-rigidly (or )  )))
-
 (defun textmate-shift-left (&optional arg)
   "Shift the line or region to the ARG places to the left."
   (interactive)
