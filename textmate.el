@@ -22,8 +22,8 @@
 ;;  ⇧⌘T - Go to Symbol
 ;;    ⌘L - Go to Line
 ;;    ⌘/ - Comment Line (or Selection/Region)
-;;    ⌘] - Shift Right (currently indents region)
-;;    ⌘[ - Shift Left  (not yet implemented)
+;;    ⌘] - Shift Right
+;;    ⌘[ - Shift Left
 ;;  ⌥⌘] - Align Assignments
 ;;  ⌥⌘[ - Indent Line
 ;;  ⌘RET - Insert Newline at Line's End
@@ -87,8 +87,10 @@
                                       ,(kbd "A-M-]") [(control c)(control a)])
                                      (indent-according-to-mode 
                                       ,(kbd "A-M-[") nil)
-                                     (indent-region 
+                                     (textmate-shift-right
                                       ,(kbd "A-]")   [(control tab)])
+                                     (textmate-shift-left
+                                      ,(kbd "A-[")   [(control shift tab)])
                                      (comment-or-uncomment-region-or-line 
                                       ,(kbd "A-/")   [(control c)(control k)])
                                      (textmate-goto-file 
@@ -217,6 +219,26 @@
    ((member ".git" (directory-files root)) (expand-file-name root))
    ((equal (expand-file-name root) "/") nil)
    (t (textmate-find-project-root (concat (file-name-as-directory root) "..")))))
+
+(defun textmate-shift-right (&optional arg)
+  "Shift the line or region to the ARG places to the right.
+
+A place is considered `tab-width' character columns."
+  (interactive)
+  (let ((beg (or (and mark-active (region-beginning)) (line-beginning-position)))
+        (end (or (and mark-active (region-end)) (line-end-position))))
+    (indent-rigidly beg end (* (or arg 1) tab-width))))
+
+  (save-excursion
+    (when (not mark-active)
+      (push-mark (line-beginning-position))
+      (goto-char (line-end-position)))
+    (indent-rigidly (or )  )))
+
+(defun textmate-shift-left (&optional arg)
+  "Shift the line or region to the ARG places to the left."
+  (interactive)
+  (textmate-shift-right (* -1 (or arg 1))))
 
 ;;;###autoload
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
