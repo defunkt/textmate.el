@@ -73,30 +73,54 @@
     (none ,(lambda (a) ())))
   "The list of functions to enable and disable completing minor modes")
 
-(defvar *textmate-mode-map* (make-sparse-keymap))
+(defvar *textmate-mode-map*
+  (let ((map (make-sparse-keymap)))
+    (cond ((featurep 'aquamacs)
+	   (define-key map [A-return] 'textmate-next-line)
+	   (define-key map (kbd "A-M-t") 'textmate-clear-cache)
+	   (define-key map (kbd "A-M-]") 'align)
+	   (define-key map (kbd "A-M-[") 'indent-according-to-mode)
+	   (define-key map (kbd "A-]")  'textmate-shift-right)
+	   (define-key map (kbd "A-[") 'textmate-shift-left)
+	   (define-key map (kbd "A-/") 'comment-or-uncomment-region-or-line)
+	   (define-key map (kbd "A-t") 'textmate-goto-file)
+	   (define-key map (kbd "A-T") 'textmate-goto-symbol))
+	  ((and (featurep 'mac-carbon) mac-key-mode)
+	   (define-key map [(alt meta return)] 'textmate-next-line)
+	   (define-key map [(alt meta t)] 'textmate-clear-cache)
+	   (define-key map [(alt meta \])] 'align)
+	   (define-key map [(alt meta \[)] 'indent-according-to-mode)
+	   (define-key map [(alt \])]  'textmate-shift-right)
+	   (define-key map [(alt \[)] 'textmate-shift-left)
+	   (define-key map [(meta /)] 'comment-or-uncomment-region-or-line)
+	   (define-key map [(alt t)] 'textmate-goto-file)
+	   (define-key map [(alt shift t)] 'textmate-goto-symbol))
+	  ((featurep 'ns)  ;; Emacs.app
+	   (define-key map [(super meta return)] 'textmate-next-line)
+	   (define-key map [(super meta t)] 'textmate-clear-cache)
+	   (define-key map [(super meta \])] 'align)
+	   (define-key map [(super meta \[)] 'indent-according-to-mode)
+	   (define-key map [(super \])]  'textmate-shift-right)
+	   (define-key map [(super \[)] 'textmate-shift-left)
+	   (define-key map [(meta /)] 'comment-or-uncomment-region-or-line)
+	   (define-key map [(super t)] 'textmate-goto-file)
+	   (define-key map [(super shift t)] 'textmate-goto-symbol))
+	  (t ;; Any other version
+	   (define-key map [(meta return)] 'textmate-next-line)
+	   (define-key map [(control c)(control t)] 'textmate-clear-cache)
+	   (define-key map [(control c)(control a)] 'align)
+	   (define-key map [(control tab)] 'textmate-shift-right)
+	   (define-key map [(control shift tab)] 'textmate-shift-left)
+	   (define-key map [(control c)(control k)] 'comment-or-uncomment-region-or-line)
+	   (define-key map [(meta t)] 'textmate-goto-file)
+	   (define-key map [(meta shift t)] 'textmate-goto-symbol)))
+	  map))
+
+
 (defvar *textmate-project-root* nil)
 (defvar *textmate-project-files* '())
 (defvar *textmate-gf-exclude* 
   "/\\.|vendor|fixtures|tmp|log|build|\\.xcodeproj|\\.nib|\\.framework|\\.app|\\.pbproj|\\.pbxproj|\\.xcode|\\.xcodeproj|\\.bundle")
-
-(defvar *textmate-keybindings-list* `((textmate-next-line 
-                                     [A-return]    [M-return])
-                                     (textmate-clear-cache 
-                                      ,(kbd "A-M-t") [(control c)(control t)])
-                                     (align 
-                                      ,(kbd "A-M-]") [(control c)(control a)])
-                                     (indent-according-to-mode 
-                                      ,(kbd "A-M-[") nil)
-                                     (textmate-shift-right
-                                      ,(kbd "A-]")   [(control tab)])
-                                     (textmate-shift-left
-                                      ,(kbd "A-[")   [(control shift tab)])
-                                     (comment-or-uncomment-region-or-line 
-                                      ,(kbd "A-/")   [(control c)(control k)])
-                                     (textmate-goto-file 
-                                      ,(kbd "A-t")   [(meta t)])
-                                     (textmate-goto-symbol 
-                                      ,(kbd "A-T")   [(meta T)])))
 
 ;;; Bindings
 
@@ -104,22 +128,6 @@
   "Add up/down keybindings for ido."
   (define-key ido-completion-map [up] 'ido-prev-match)
   (define-key ido-completion-map [down] 'ido-next-match))
-
-(defun textmate-bind-keys ()
-  (add-hook 'ido-setup-hook 'textmate-ido-fix)
-
-  ; weakness until i figure out how to do this right
-  (when (boundp 'osx-key-mode-map)
-    (define-key osx-key-mode-map (kbd "A-t") 'textmate-goto-file)
-    (define-key osx-key-mode-map (kbd "A-T") 'textmate-goto-symbol)) 
- 
-  (let ((member) (i 0) (access (if (boundp 'aquamacs-version) 'cadr 'caddr)))
-    (setq member (nth i *textmate-keybindings-list*))
-    (while member
-      (if (funcall access member)
-       (define-key *textmate-mode-map* (funcall access member) (car member)))
-      (setq member (nth i *textmate-keybindings-list*))
-      (setq i (+ i 1)))))
 
 (defun textmate-completing-read (&rest args)
   (let ((reading-fn (cadr (assoc textmate-completing-library *textmate-completing-function-alist*))))
@@ -239,7 +247,7 @@ A place is considered `tab-width' character columns."
 ;;;###autoload
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
   :lighter " mate" :global t :keymap *textmate-mode-map*
-  (textmate-bind-keys)
+  (add-hook 'ido-setup-hook 'textmate-ido-fix)
   ; activate preferred completion library
   (dolist (mode *textmate-completing-minor-mode-alist*)
     (if (eq (car mode) textmate-completing-library)
