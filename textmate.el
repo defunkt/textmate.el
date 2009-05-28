@@ -54,6 +54,10 @@
 ;;; Depends on imenu
 (require 'imenu)
 
+;;; Needed for flet
+(eval-when-compile
+  (require 'cl))
+
 ;;; Minor mode
 
 (defvar textmate-use-file-cache t
