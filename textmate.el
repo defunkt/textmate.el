@@ -106,7 +106,7 @@
 	   (define-key map [(super meta \[)] 'indent-according-to-mode)
 	   (define-key map [(super \])]  'textmate-shift-right)
 	   (define-key map [(super \[)] 'textmate-shift-left)
-	   (define-key map [(meta /)] 'comment-or-uncomment-region-or-line)
+	   (define-key map [(super /)] 'comment-or-uncomment-region-or-line)
 	   (define-key map [(super t)] 'textmate-goto-file)
 	   (define-key map [(super shift t)] 'textmate-goto-symbol))
 	  (t ;; Any other version
@@ -136,6 +136,30 @@
 (defun textmate-completing-read (&rest args)
   (let ((reading-fn (cadr (assoc textmate-completing-library *textmate-completing-function-alist*))))
   (apply (symbol-function reading-fn) args)))
+
+;;; allow-line-as-region-for-function adds an "-or-line" version of
+;;; the given comment function which (un)comments the current line is
+;;; the mark is not active.  This code comes from Aquamac's osxkeys.el
+;;; and is licensed under the GPL
+
+(defmacro allow-line-as-region-for-function (orig-function)
+`(defun ,(intern (concat (symbol-name orig-function) "-or-line")) 
+   ()
+   ,(format "Like `%s', but acts on the current line if mark is not active." orig-function)
+   (interactive)
+   (if mark-active
+       (call-interactively (function ,orig-function))
+     (save-excursion 
+       ;; define a region (temporarily) -- so any C-u prefixes etc. are preserved.
+       (beginning-of-line)
+       (set-mark (point))
+       (end-of-line)
+       (call-interactively (function ,orig-function))))))
+
+(defun textmate-define-comment-line ()
+  "Add or-line (un)comment function if not already defined"
+  (unless (fboundp 'comment-or-uncomment-region-or-line)
+    (allow-line-as-region-for-function comment-or-uncomment-region)))
 
 ;;; Commands
 
@@ -252,6 +276,7 @@ A place is considered `tab-width' character columns."
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
   :lighter " mate" :global t :keymap *textmate-mode-map*
   (add-hook 'ido-setup-hook 'textmate-ido-fix)
+  (textmate-define-comment-line)
   ; activate preferred completion library
   (dolist (mode *textmate-completing-minor-mode-alist*)
     (if (eq (car mode) textmate-completing-library)
