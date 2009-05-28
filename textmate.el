@@ -89,7 +89,7 @@
 	   (define-key map (kbd "A-/") 'comment-or-uncomment-region-or-line)
 	   (define-key map (kbd "A-t") 'textmate-goto-file)
 	   (define-key map (kbd "A-T") 'textmate-goto-symbol))
-	  ((and (featurep 'mac-carbon) mac-key-mode)
+	  ((and (featurep 'mac-carbon) (eq window-system 'mac) mac-key-mode)
 	   (define-key map [(alt meta return)] 'textmate-next-line)
 	   (define-key map [(alt meta t)] 'textmate-clear-cache)
 	   (define-key map [(alt meta \])] 'align)
