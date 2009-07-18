@@ -203,7 +203,7 @@
   (interactive)
   (let ((root (textmate-project-root)))
     (when (null root) 
-      (error "Hai Can't find any .git directory"))
+      (error "Can't find a suitable project root(.git/Rakefile/Makefile) directory"))
     (find-file 
      (concat 
       (expand-file-name root) "/"
