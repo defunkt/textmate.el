@@ -203,7 +203,7 @@
   (interactive)
   (let ((root (textmate-project-root)))
     (when (null root) 
-      (error "Can't find any .git directory"))
+      (error "Hai Can't find any .git directory"))
     (find-file 
      (concat 
       (expand-file-name root) "/"
@@ -252,7 +252,11 @@
 (defun textmate-find-project-root (&optional root)
   (when (null root) (setq root default-directory))
   (cond
-   ((member "Rakefile" (directory-files root)) (expand-file-name root))
+   ((or 
+		 (member ".git" (directory-files root)) 
+		 (member "Rakefile" (directory-files root))
+		 (member "Makefile" (directory-files root)))
+		(expand-file-name root))
    ((equal (expand-file-name root) "/") nil)
    (t (textmate-find-project-root (concat (file-name-as-directory root) "..")))))
 
