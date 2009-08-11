@@ -249,13 +249,21 @@
         (setq *textmate-project-root* nil))))
   *textmate-project-root*)
 
+(defun root-match(root names)
+	(member (car names) (directory-files root)))
+
+(defun root-matches(root names)
+	(if (root-match root names) 
+			(root-match root names) 
+			(if (eq (length (cdr names)) 0)
+					'nil
+					(root-matches root (cdr names))
+					)))
+
 (defun textmate-find-project-root (&optional root)
   (when (null root) (setq root default-directory))
   (cond
-   ((or 
-		 (member ".git" (directory-files root)) 
-		 (member "Rakefile" (directory-files root))
-		 (member "Makefile" (directory-files root)))
+   ((root-matches root  '(".git" "Rakefile" "Makefile" "README" "build.xml"))
 		(expand-file-name root))
    ((equal (expand-file-name root) "/") nil)
    (t (textmate-find-project-root (concat (file-name-as-directory root) "..")))))
