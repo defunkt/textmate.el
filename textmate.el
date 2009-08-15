@@ -11,8 +11,6 @@
 
 ;; This file is NOT part of GNU Emacs.
 
-;; Licensed under the same terms as Emacs.
-
 ;;; Commentary:
 
 ;; This minor mode exists to mimick TextMate's awesome
