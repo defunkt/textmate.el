@@ -204,8 +204,12 @@
 (defun textmate-goto-file ()
   (interactive)
   (let ((root (textmate-project-root)))
-    (when (null root) 
-      (error "Can't find a suitable project root(.git/Rakefile/Makefile) directory"))
+    (when (null root)
+      (error 
+       (concat 
+        "Can't find a sutiable project root (" 
+        (string-join " " *textmate-project-roots* )
+        ")")))
     (find-file 
      (concat 
       (expand-file-name root) "/"
