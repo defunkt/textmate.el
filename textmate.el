@@ -125,6 +125,8 @@
 (defvar *textmate-project-files* '())
 (defvar *textmate-gf-exclude* 
   "/\\.|vendor|fixtures|tmp|log|build|\\.xcodeproj|\\.nib|\\.framework|\\.app|\\.pbproj|\\.pbxproj|\\.xcode|\\.xcodeproj|\\.bundle|\\.pyc")
+(defvar *textmate-project-roots*
+  '(".git" ".hg" "Rakefile" "Makefile" "README" "build.xml"))
 
 ;;; Bindings
 
@@ -263,7 +265,7 @@
 (defun textmate-find-project-root (&optional root)
   (when (null root) (setq root default-directory))
   (cond
-   ((root-matches root  '(".git" "Rakefile" "Makefile" "README" "build.xml"))
+   ((root-matches root *textmate-project-roots*)
 		(expand-file-name root))
    ((equal (expand-file-name root) "/") nil)
    (t (textmate-find-project-root (concat (file-name-as-directory root) "..")))))
