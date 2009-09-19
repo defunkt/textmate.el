@@ -1,10 +1,9 @@
 ;; textmate.el --- TextMate minor mode for Emacs
 
-;; Copyright (C) 2008 Chris Wanstrath <chris@ozmm.org>
+;; Copyright (C) 2008, 2009 Chris Wanstrath <chris@ozmm.org>
 
 ;; Licensed under the same terms as Emacs.
 
-;; Version: 0.1.0
 ;; Keywords: textmate osx mac
 ;; Created: 22 Nov 2008
 ;; Author: Chris Wanstrath <chris@ozmm.org>
@@ -28,10 +27,15 @@
 ;;  ⌥⌘T - Reset File Cache (for Go to File)
 
 ;; A "project" in textmate-mode is determined by the presence of
-;; a .git directory. If no .git directory is found in your current
-;; directory, textmate-mode will traverse upwards until one (or none)
-;; is found. The directory housing the .git directory is presumed
-;; to be the project's root.
+;; a .git directory, an .hg directory, a Rakefile, or a Makefile.
+
+;; You can configure what makes a project root by appending a file
+;; or directory name onto the `*textmate-project-roots*' list.
+
+;; If no project root indicator is found in your current directory, 
+;; textmate-mode will traverse upwards until one (or none) is found.
+;; The directory housing the project root indicator (e.g. a .git or .hg
+;; directory) is presumed to be the project's root.
 
 ;; In other words, calling Go to File from 
 ;; ~/Projects/fieldrunners/app/views/towers/show.html.erb will use
@@ -58,11 +62,20 @@
 
 ;;; Minor mode
 
+(defvar *textmate-gf-exclude* 
+  "/\\.|vendor|fixtures|tmp|log|build|\\.xcodeproj|\\.nib|\\.framework|\\.app|\\.pbproj|\\.pbxproj|\\.xcode|\\.xcodeproj|\\.bundle|\\.pyc"
+  "Regexp of files to exclude from `textmate-goto-file'.")
+
+(defvar *textmate-project-roots*
+  '(".git" ".hg" "Rakefile" "Makefile" "README" "build.xml")
+  "The presence of any file/directory in this list indicates a project root.")
+
 (defvar textmate-use-file-cache t
-  "* Should `textmate-goto-file' keep a local cache of files?")
+  "Should `textmate-goto-file' keep a local cache of files?")
 
 (defvar textmate-completing-library 'ido 
-  "The library `textmade-goto-symbol' and `textmate-goto-file' should use for completing filenames and symbols (`ido' by default)")
+  "The library `textmade-goto-symbol' and `textmate-goto-file' should use for 
+completing filenames and symbols (`ido' by default)")
 
 (defvar *textmate-completing-function-alist* '((ido ido-completing-read) 
                                                (icicles  icicle-completing-read) 
@@ -118,13 +131,10 @@
 	   (define-key map [(meta shift t)] 'textmate-goto-symbol)))
 	  map))
 
-
-(defvar *textmate-project-root* nil)
-(defvar *textmate-project-files* '())
-(defvar *textmate-gf-exclude* 
-  "/\\.|vendor|fixtures|tmp|log|build|\\.xcodeproj|\\.nib|\\.framework|\\.app|\\.pbproj|\\.pbxproj|\\.xcode|\\.xcodeproj|\\.bundle|\\.pyc")
-(defvar *textmate-project-roots*
-  '(".git" ".hg" "Rakefile" "Makefile" "README" "build.xml"))
+(defvar *textmate-project-root* nil
+  "Used internally to cache the project root.")
+(defvar *textmate-project-files* '()
+  "Used internally to cache the files in a project.")
 
 ;;; Bindings
 
@@ -134,7 +144,11 @@
   (define-key ido-completion-map [down] 'ido-next-match))
 
 (defun textmate-completing-read (&rest args)
-  (let ((reading-fn (cadr (assoc textmate-completing-library *textmate-completing-function-alist*))))
+  "Uses `*textmate-completing-function-alist*' to call the appropriate completing
+function."
+  (let ((reading-fn 
+         (cadr (assoc textmate-completing-library 
+                      *textmate-completing-function-alist*))))
   (apply (symbol-function reading-fn) args)))
 
 ;;; allow-line-as-region-for-function adds an "-or-line" version of
@@ -164,13 +178,14 @@
 ;;; Commands
 
 (defun textmate-next-line ()
+  "Inserts an indented newline after the current line and moves the point to it."
   (interactive)
   (end-of-line)
   (newline-and-indent))
 
 ;; http://chopmo.blogspot.com/2008/09/quickly-jumping-to-symbols.html
 (defun textmate-goto-symbol ()
-  "Will update the imenu index and then use ido to select a symbol to navigate to"
+  "Will update the imenu index then use your completing read to jump to a symbol."
   (interactive)
   (imenu--make-index-alist)
   (let ((name-and-pos '())
@@ -200,12 +215,13 @@
       (goto-char position))))
 
 (defun textmate-goto-file ()
+  "Uses your completing read to quickly jump to a file in a project."
   (interactive)
   (let ((root (textmate-project-root)))
     (when (null root)
       (error 
        (concat 
-        "Can't find a sutiable project root (" 
+        "Can't find a suitable project root (" 
         (string-join " " *textmate-project-roots* )
         ")")))
     (find-file 
@@ -216,6 +232,7 @@
        (textmate-cached-project-files root))))))
 
 (defun textmate-clear-cache ()
+  "Clears the project root and project files cache. Use after adding files."
   (interactive)
   (setq *textmate-project-root* nil)
   (setq *textmate-project-files* nil)
@@ -224,6 +241,7 @@
 ;;; Utilities
 
 (defun textmate-project-files (root)
+  "Finds all files in a given project."
   (split-string 
     (shell-command-to-string 
      (concat 
@@ -236,6 +254,7 @@
       "/::'")) "\n" t))
 
 (defun textmate-cached-project-files (&optional root)
+  "Finds and caches all files in a given project."
   (cond
    ((null textmate-use-file-cache) (textmate-project-files root))
    ((equal (textmate-project-root) (car *textmate-project-files*))
@@ -244,6 +263,7 @@
                  `(,root . ,(textmate-project-files root)))))))
 
 (defun textmate-project-root ()
+  "Returns the current project root."
   (when (or 
          (null *textmate-project-root*) 
          (not (string-match *textmate-project-root* default-directory)))
@@ -265,6 +285,7 @@
 					)))
 
 (defun textmate-find-project-root (&optional root)
+  "Determines the current project root by recursively searching for an indicator."  
   (when (null root) (setq root default-directory))
   (cond
    ((root-matches root *textmate-project-roots*)
