@@ -224,7 +224,7 @@ Symbols matching the text at point are put first in the completion list."
                   matching-symbols)))))
     (let* ((selected-symbol (ido-completing-read "Symbol? " symbol-names))
            (position (cdr (assoc selected-symbol name-and-pos))))
-      (goto-char position))))
+      (goto-char (if (overlayp position) (overlay-start position) position)))))
 
 (defun textmate-goto-file ()
   "Uses your completing read to quickly jump to a file in a project."
