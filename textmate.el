@@ -268,7 +268,7 @@ Symbols matching the text at point are put first in the completion list."
                     (setq symbol-names (cons symbol
                                              (delete symbol symbol-names))))
                   matching-symbols)))))
-    (let* ((selected-symbol (ido-completing-read "Symbol? " symbol-names))
+    (let* ((selected-symbol (ido-completing-read "Symbol? " (reverse symbol-names)))
            (position (cdr (assoc selected-symbol name-and-pos))))
       (goto-char (if (overlayp position) (overlay-start position) position)))))
 
