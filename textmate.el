@@ -107,7 +107,11 @@ the project root.")
 	   (define-key map (kbd "A-/") 'comment-or-uncomment-region-or-line)
 	   (define-key map (kbd "A-L") 'textmate-select-line)
 	   (define-key map (kbd "A-t") 'textmate-goto-file)
-	   (define-key map (kbd "A-T") 'textmate-goto-symbol))
+	   (define-key map (kbd "A-T") 'textmate-goto-symbol)
+     (define-key map (kbd "M-<up>") 'textmate-column-up)
+     (define-key map (kbd "M-<down>") 'textmate-column-down)
+     (define-key map (kbd "M-S-<up>") 'textmate-column-up-with-select)
+     (define-key map (kbd "M-S-<down>") 'textmate-column-down-with-select))
 	  ((and (featurep 'mac-carbon) (eq window-system 'mac) mac-key-mode)
 	   (define-key map [(alt meta return)] 'textmate-next-line)
 	   (define-key map [(alt meta t)] 'textmate-clear-cache)
@@ -118,7 +122,11 @@ the project root.")
 	   (define-key map [(meta /)] 'comment-or-uncomment-region-or-line)
 	   (define-key map [(alt t)] 'textmate-goto-file)
            (define-key map [(alt shift l)] 'textmate-select-line)
-	   (define-key map [(alt shift t)] 'textmate-goto-symbol))
+	   (define-key map [(alt shift t)] 'textmate-goto-symbol)
+     (define-key map [(alt up)] 'textmate-column-up)
+     (define-key map [(alt down)] 'textmate-column-down)
+     (define-key map [(alt shift up)] 'textmate-column-up-with-select)
+     (define-key map [(alt shift down)] 'textmate-column-down-with-select))
 	  ((featurep 'ns)  ;; Emacs.app
 	   (define-key map [(super meta return)] 'textmate-next-line)
 	   (define-key map [(super meta t)] 'textmate-clear-cache)
@@ -129,7 +137,11 @@ the project root.")
 	   (define-key map [(super /)] 'comment-or-uncomment-region-or-line)
 	   (define-key map [(super t)] 'textmate-goto-file)
 	   (define-key map [(super shift l)] 'textmate-select-line)
-	   (define-key map [(super shift t)] 'textmate-goto-symbol))
+	   (define-key map [(super shift t)] 'textmate-goto-symbol)
+     (define-key map [(meta up)] 'textmate-column-up)
+     (define-key map [(meta down)] 'textmate-column-down)
+     (define-key map [(meta shift up)] 'textmate-column-up-with-select)
+     (define-key map [(meta shift down)] 'textmate-column-down-with-select))
 	  (t ;; Any other version
 	   (define-key map [(meta return)] 'textmate-next-line)
 	   (define-key map [(control c)(control t)] 'textmate-clear-cache)
@@ -139,7 +151,11 @@ the project root.")
 	   (define-key map [(control c)(control k)] 'comment-or-uncomment-region-or-line)
 	   (define-key map [(meta t)] 'textmate-goto-file)
 	   (define-key map [(meta shift l)] 'textmate-select-line)
-	   (define-key map [(meta shift t)] 'textmate-goto-symbol)))
+	   (define-key map [(meta shift t)] 'textmate-goto-symbol)
+     (define-key map [(alt up)] 'textmate-column-up)
+     (define-key map [(alt down)] 'textmate-column-down)
+     (define-key map [(alt shift up)] 'textmate-column-up-with-select)
+     (define-key map [(alt shift down)] 'textmate-column-down-with-select)))
 	  map))
 
 (defvar *textmate-project-root* nil
@@ -147,6 +163,7 @@ the project root.")
 (defvar *textmate-project-files* '()
   "Used internally to cache the files in a project.")
 
+(defcustom textmate-word-characters "a-zA-Z0-9_" "Word Characters for Column Movement")
 ;;; Bindings
 
 (defun textmate-ido-fix ()
@@ -375,6 +392,60 @@ A place is considered `tab-width' character columns."
   "Shift the line or region to the ARG places to the left."
   (interactive)
   (textmate-shift-right (* -1 (or arg 1))))
+
+(defun textmate-go-column (direction arg)
+  "Move down a column"
+  (let* ((orig-line (line-number-at-pos))
+         (orig-column (current-column))
+         (prefix-match-regex (if (<= orig-column 1) "^" (format "^.\\{%d\\}" (- orig-column 1))) )
+         (word-regex (concat "[" textmate-word-characters "]"))
+         (non-word-regex (concat "[^\n" textmate-word-characters "]"))
+         (matching-regex (concat prefix-match-regex
+                                 (cond ((looking-back "^") "")
+                                       ((looking-back word-regex) word-regex)
+                                       (t non-word-regex))
+                                 (cond ((looking-at "$") "$")
+                                       ((looking-at word-regex) word-regex)
+                                       (t non-word-regex))))
+         (do-search (if (= direction 1)
+                        (lambda () (search-forward-regexp matching-regex nil t))
+                      (lambda () (search-backward-regexp matching-regex nil t)))))
+    (forward-char direction)
+    (funcall do-search)
+    (backward-char direction)
+    (move-to-column orig-column)
+    (if (= (line-number-at-pos) (+ orig-line direction)) ;; did you only move one line?
+        (progn
+          (while (= (line-number-at-pos) (+ orig-line direction))
+            (setq orig-line (line-number-at-pos))
+            (funcall do-search)
+            (move-to-column orig-column))
+          (goto-line orig-line)
+          (move-to-column orig-column)))))
+
+(defun textmate-column-up (arg)
+  "Move up a column, textmate-style"
+  (interactive "P")
+  (textmate-go-column -1 arg))
+
+(defun textmate-column-down (arg)
+  "Move down a column, textmate-style"
+  (interactive "P")
+  (textmate-go-column 1 arg))
+
+(defun textmate-column-up-with-select (arg)
+  "Move up a column, selecting with shift-select"
+  (interactive "P")
+  (unless mark-active (progn (push-mark (point))
+                             (setq mark-active t transient-mark-mode t)))
+  (let (deactivate-mark) (textmate-column-up arg)))
+
+(defun textmate-column-down-with-select (arg)
+  "Move down a column, selecting with shift-select"
+  (interactive "P")
+  (unless mark-active (progn (push-mark (point))
+                             (setq mark-active t transient-mark-mode t)))
+  (let (deactivate-mark) (textmate-column-down arg)))
 
 ;;;###autoload
 (define-minor-mode textmate-mode "TextMate Emulation Minor Mode"
