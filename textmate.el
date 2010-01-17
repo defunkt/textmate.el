@@ -7,7 +7,7 @@
 ;; Keywords: textmate osx mac
 ;; Created: 22 Nov 2008
 ;; Author: Chris Wanstrath <chris@ozmm.org>
-;; Version: 1
+;; Version: 2
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -25,6 +25,8 @@
 ;;    ⌘[ - Shift Left
 ;;  ⌥⌘] - Align Assignments
 ;;  ⌥⌘[ - Indent Line
+;;    ⌥↑ - Column Up
+;;    ⌥↓ - Column Down
 ;;  ⌘RET - Insert Newline at Line's End
 ;;  ⌥⌘T - Reset File Cache (for Go to File)
 
