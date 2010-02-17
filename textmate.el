@@ -79,6 +79,10 @@
   "The library `textmade-goto-symbol' and `textmate-goto-file' should use for
 completing filenames and symbols (`ido' by default)")
 
+(defvar textmate-find-files-command "find %s -type f"
+  "The command `textmate-project-root' uses to find files. %s will be replaced
+the project root.")
+
 (defvar *textmate-completing-function-alist* '((ido ido-completing-read)
                                                (icicles  icicle-completing-read)
                                                (none completing-read))
@@ -299,13 +303,22 @@ Symbols matching the text at point are put first in the completion list."
   (split-string
     (shell-command-to-string
      (concat
-      "find "
-      root
-      " -type f  | grep -vE '"
+      (textmate-string-replace "%s" root textmate-find-files-command)
+      "  | grep -vE '"
       *textmate-gf-exclude*
       "' | sed 's:"
       *textmate-project-root*
       "/::'")) "\n" t))
+
+;; http://snipplr.com/view/18683/stringreplace/
+(defun textmate-string-replace (this withthat in)
+  "replace THIS with WITHTHAT' in the string IN"
+  (with-temp-buffer
+    (insert in)
+    (goto-char (point-min))
+    (while (search-forward this nil t)
+      (replace-match withthat nil t))
+    (buffer-substring (point-min) (point-max))))
 
 (defun textmate-cached-project-files (&optional root)
   "Finds and caches all files in a given project."
