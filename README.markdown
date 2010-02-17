@@ -7,6 +7,7 @@ TextMate Minor Mode
     ;;    ⌘T - Go to File
     ;;  ⇧⌘T - Go to Symbol
     ;;    ⌘L - Go to Line
+    ;;  ⇧⌘L - Select Line (or expand Selection to select lines)
     ;;    ⌘/ - Comment Line (or Selection/Region)
     ;;    ⌘] - Shift Right (currently indents region)
     ;;    ⌘[ - Shift Left  (not yet implemented)
