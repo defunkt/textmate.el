@@ -79,7 +79,7 @@
   "The library `textmade-goto-symbol' and `textmate-goto-file' should use for
 completing filenames and symbols (`ido' by default)")
 
-(defvar textmate-find-files-command "find %s -type f"
+(defvar textmate-find-files-command "find \"%s\" -type f"
   "The command `textmate-project-root' uses to find files. %s will be replaced
 the project root.")
 
