@@ -69,7 +69,7 @@
   "Regexp of files to exclude from `textmate-goto-file'.")
 
 (defvar *textmate-project-roots*
-  '(".git" ".hg" "Rakefile" "Makefile" "README" "build.xml")
+  '(".git" ".hg" "Rakefile" "Makefile" "README" "build.xml" ".emacs-project")
   "The presence of any file/directory in this list indicates a project root.")
 
 (defvar textmate-use-file-cache t
