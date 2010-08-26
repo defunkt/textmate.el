@@ -34,7 +34,7 @@
 ;; a .git directory, an .hg directory, a Rakefile, or a Makefile.
 
 ;; You can configure what makes a project root by appending a file
-;; or directory name onto the `*textmate-project-roots*' list.
+;; or directory name onto the `textmate-project-roots' list.
 
 ;; If no project root indicator is found in your current directory,
 ;; textmate-mode will traverse upwards until one (or none) is found.
@@ -66,20 +66,41 @@
 
 ;;; Minor mode
 
-(defvar *textmate-gf-exclude*
-  "(/|^)(\\.+[^/]+|vendor|fixtures|tmp|log|classes|build)($|/)|(\\.xcodeproj|\\.nib|\\.framework|\\.app|\\.pbproj|\\.pbxproj|\\.xcode|\\.xcodeproj|\\.bundle|\\.pyc)(/|$)"
-  "Regexp of files to exclude from `textmate-goto-file'.")
+(defgroup textmate nil
+  "TextMate feature emulation for Emacs"
+  :prefix "textmate-"
+  :group  'emulations)
 
-(defvar *textmate-project-roots*
+(defcustom textmate-gf-exclude
+  "(/|^)(\\.+[^/]+|vendor|fixtures|tmp|log|classes|build)($|/)|(\\.xcodeproj|\\.nib|\\.framework|\\.app|\\.pbproj|\\.pbxproj|\\.xcode|\\.xcodeproj|\\.bundle|\\.pyc)(/|$)"
+  "A POSIX extended regular expression of files to exclude from `textmate-goto-file'.
+
+  textmate-goto-file filters it's list of files using `grep -vE <textmate-gf-exclude>`.  Since the filter happens after all files are traversed, the regex needs to match both '.git' and '.git/config' in order to ignore the folder '.git/'."
+
+  :group 'textmate
+  :type 'string)
+
+(defcustom textmate-project-roots
   '(".git" ".hg" "Rakefile" "Makefile" "README" "build.xml" ".emacs-project")
-  "The presence of any file/directory in this list indicates a project root.")
+
+  "The presence of any file/directory in this list indicates a project root."
+
+  :group 'textmate
+  :type  '(repeat string))
 
 (defvar textmate-use-file-cache t
   "Should `textmate-goto-file' keep a local cache of files?")
 
-(defvar textmate-completing-library 'ido
+(defcustom textmate-completing-library
+  'ido
   "The library `textmade-goto-symbol' and `textmate-goto-file' should use for
-completing filenames and symbols (`ido' by default)")
+completing filenames and symbols (`ido' by default)"
+
+  :group 'textmate
+  :type  (cons 'radio
+               '((symbol ido)
+                 (symbol icicles)
+                 (symbol none))))
 
 (defvar textmate-find-files-command "(cd %S && find . -type f)"
   "The command `textmate-project-root' uses to find files. %S will be replaced
@@ -164,7 +185,12 @@ the project root and will be surrounded by double-quotes.")
 (defvar *textmate-project-files* '()
   "Used internally to cache the files in a project.")
 
-(defcustom textmate-word-characters "a-zA-Z0-9_" "Word Characters for Column Movement")
+(defcustom textmate-word-characters
+  "a-zA-Z0-9_"
+  "Regexp of Word Characters for Column Movement"
+  :group 'textmate
+  :type 'regexp)
+
 ;;; Bindings
 
 (defun textmate-ido-fix ()
@@ -323,7 +349,7 @@ Symbols matching the text at point are put first in the completion list."
      (concat
       (format textmate-find-files-command root)
       " | grep -vE '"
-      *textmate-gf-exclude*
+      textmate-gf-exclude
       "' | sed 's:./::'")) "\n" t))
 
 ;; http://snipplr.com/view/18683/stringreplace/
@@ -371,7 +397,7 @@ Symbols matching the text at point are put first in the completion list."
   "Determines the current project root by recursively searching for an indicator."
   (when (null root) (setq root default-directory))
   (cond
-   ((root-matches root *textmate-project-roots*)
+   ((root-matches root textmate-project-roots)
     (expand-file-name root))
    ((equal (expand-file-name root) "/") nil)
    (t (textmate-find-project-root (concat (file-name-as-directory root) "..")))))
