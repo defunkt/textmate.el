@@ -316,7 +316,7 @@ Symbols matching the text at point are put first in the completion list."
 
 ;;; Utilities
 
-(defun textmate-project-files (root)
+(defun textmate-find-project-files (root)
   "Finds all files in a given project."
   (split-string
     (shell-command-to-string
@@ -327,6 +327,11 @@ Symbols matching the text at point are put first in the completion list."
       "' | sed 's:"
       *textmate-project-root*
       "/::'")) "\n" t))
+
+(defun textmate-project-files (root)
+  (sort
+    (textmate-find-project-files root)
+    '(lambda (a b) (< (length a) (length b)))))
 
 ;; http://snipplr.com/view/18683/stringreplace/
 (defun textmate-string-replace (this withthat in)
