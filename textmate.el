@@ -82,8 +82,8 @@
 completing filenames and symbols (`ido' by default)")
 
 (defvar textmate-find-files-command "find \"%s\" -type f"
-  "The command `textmate-project-root' uses to find files. %s will be replaced
-the project root.")
+  "The command `textmate-project-files' uses to find files. %s will be replaced
+by the project root.")
 
 (defvar *textmate-completing-function-alist* '((ido ido-completing-read)
                                                (icicles  icicle-completing-read)
